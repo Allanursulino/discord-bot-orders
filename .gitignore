@@ -15,15 +15,7 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Banco de dados
-database/
-backups/
-*.db
-*.sqlite
-*.sqlite3
-
 # Logs
-logs/
 *.log
 npm-debug.log*
 
