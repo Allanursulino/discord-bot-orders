@@ -1,11 +1,12 @@
 {
-  "name": "discord-bot-mercado-pago",
+  "name": "discord-bot-orders",
   "version": "1.0.0",
+  "description": "Bot de vendas Discord com Mercado Pago e Stripe",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  {
   "dependencies": {
     "discord.js": "^14.14.1",
     "express": "^4.18.2",
@@ -15,5 +16,8 @@
     "stripe": "^14.13.0",
     "fast-glob": "^3.3.2",
     "body-parser": "^1.20.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
