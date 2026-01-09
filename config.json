@@ -1,0 +1,175 @@
+{
+    "token": "process.env.DISCORD_TOKEN",
+    "guildId": "1405978261082865714",
+    
+    "regions": {
+        "br": {
+            "name": "Brasil",
+            "currency": "BRL",
+            "payment_methods": ["pix", "card"],
+            "category_id": "1407980259025883286",
+            "product_channel": "1458924793335123968",
+            "checkout_category": "1407746087528824872",
+            "emojis": {
+                "flag": "🇧🇷",
+                "currency": "R$"
+            }
+        },
+        "intl": {
+            "name": "Internacional",
+            "currency": "USD",
+            "payment_methods": ["card"],
+            "category_id": "1407980259025883286",
+            "product_channel": "1458924725937115147",
+            "checkout_category": "1407746087528824872",
+            "emojis": {
+                "flag": "🌎",
+                "currency": "$"
+            }
+        }
+    },
+    
+    "payment": {
+        "provider": "dual",
+        "auto_approve": true,
+        "pix_expiration_minutes": 30,
+        "webhook_base_url": "https://discord-bot-orders.onrender.com",
+        
+        "mercadoPago": {
+            "access_token": "process.env.MERCADO_PAGO_ACCESS_TOKEN",
+            "public_key": "process.env.MERCADO_PAGO_PUBLIC_KEY",
+            "webhook_url": "https://discord-bot-orders.onrender.com/webhook/mercado-pago",
+            "notification_url": "https://discord-bot-orders.onrender.com/webhook/mercado-pago",
+            "integrator_id": "dev_24c65fb163bf11ea96500242ac130004",
+            "environment": "production",
+            "timeout": 10000,
+            "max_retries": 3
+        },
+        
+        "stripe": {
+            "secret_key": "process.env.STRIPE_SECRET_KEY",
+            "public_key": "process.env.STRIPE_PUBLIC_KEY",
+            "webhook_secret": "process.env.STRIPE_WEBHOOK_SECRET",
+            "webhook_url": "https://discord-bot-orders.onrender.com/webhook/stripe"
+        }
+    },
+    
+    "discord": {
+        "admin_id": "297909145825443841",
+        "admin_roles": ["Administrator", "Moderator"],
+        "webhook_url": "https://discord.com/api/webhooks/1458882755990651063/6pH8iNV1m8lNf6ghrQnyVaX4C_0FX9tjgI5qQg-H2myfA0HqClvKwFLK3P_JpnF8YqCx",
+        "log_channel": "1407746196843266088",
+        "support_channel": "1407746196843266088",
+        "bot_status_channel": "1407746196843266088"
+    },
+    
+    "emojis": {
+        "pix": "💰",
+        "stripe": "💳",
+        "mercado_pago": "🏦",
+        "success": "✅",
+        "error": "❌",
+        "warning": "⚠️",
+        "cart": "🛒",
+        "loading": "🔄",
+        "product": "📦",
+        "money": "💵",
+        "br": "🇧🇷",
+        "us": "🇺🇸",
+        "world": "🌎",
+        "qr_code": "📱",
+        "timer": "⏳",
+        "check": "✔️",
+        "lock": "🔒",
+        "unlock": "🔓",
+        "download": "📥",
+        "receipt": "🧾",
+        "credit_card": "💳",
+        "bank": "🏦",
+        "shopping_bag": "🛍️"
+    },
+    
+    "settings": {
+        "auto_delete_checkout": true,
+        "checkout_timeout_minutes": 30,
+        "payment_check_interval_seconds": 15,
+        "send_dm_on_purchase": true,
+        "cleanup_interval_minutes": 60,
+        "pix_expiration_minutes": 30,
+        "max_payment_retries": 3,
+        "max_checkout_age_hours": 24,
+        "auto_restart_hours": 6,
+        "enable_logging": true,
+        "enable_debug": false,
+        "enable_backup": true,
+        "backup_interval_hours": 12,
+        "rate_limit_per_user": 5,
+        "rate_limit_window_minutes": 1,
+        "max_products_per_user": 10,
+        "enable_anti_spam": true,
+        "require_email_for_digital": false,
+        "enable_auto_refund": false,
+        "refund_timeout_hours": 72
+    },
+    
+    "database": {
+        "type": "json",
+        "path": "./database",
+        "backup_path": "./backups",
+        "auto_save": true,
+        "save_interval_seconds": 30,
+        "encryption_enabled": false
+    },
+    
+    "security": {
+        "allowed_roles": ["Administrator", "Moderator", "Seller"],
+        "blocked_users": [],
+        "allowed_channels": ["1407746196843266088", "1458924793335123968", "1458924725937115147"],
+        "enable_ip_whitelist": false,
+        "require_2fa_admin": false,
+        "max_login_attempts": 5,
+        "lockout_minutes": 15
+    },
+    
+    "notifications": {
+        "on_payment_success": true,
+        "on_payment_failure": true,
+        "on_checkout_create": true,
+        "on_checkout_complete": true,
+        "on_checkout_expire": true,
+        "on_low_stock": true,
+        "on_new_product": true,
+        "on_daily_report": true,
+        "report_time": "09:00",
+        "timezone": "America/Sao_Paulo"
+    },
+    
+    "features": {
+        "enable_coupons": true,
+        "enable_variants": true,
+        "enable_stock": true,
+        "enable_digital_delivery": true,
+        "enable_physical_delivery": false,
+        "enable_affiliate": false,
+        "enable_taxes": false,
+        "enable_shipping": false,
+        "enable_multi_currency": true,
+        "enable_auto_translation": false,
+        "enable_analytics": true,
+        "enable_backup_restore": true
+    },
+    
+    "urls": {
+        "webhook_base": "https://discord-bot-orders.onrender.com",
+        "terms_of_service": "",
+        "privacy_policy": "",
+        "support_server": "https://discord.gg/qfR6HbJqmY",
+        "documentation": "",
+        "status_page": "https://discord-bot-orders.onrender.com/health"
+    },
+    
+    "version": "2.0.0",
+    "environment": "process.env.NODE_ENV || 'production'",
+    "maintenance_mode": false,
+    "maintenance_message": "🚧 Sistema em manutenção. Volte em breve!"
+}

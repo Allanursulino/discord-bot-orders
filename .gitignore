@@ -1,0 +1,38 @@
+# .gitignore - Arquivos que NÃO vão para o GitHub
+
+# Chaves secretas
+.env
+.env.local
+.env.*.local
+
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ambiente
+.DS_Store
+Thumbs.db
+
+# Banco de dados
+database/
+backups/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Sistema
+.cache/
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
