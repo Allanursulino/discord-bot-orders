@@ -1,17 +1,8 @@
-const db = require("../database");
-const config = require("../config.json");
+// @shared/index.js
+const db = require('../database');
+const { formatPrice } = require('./format');
 
 module.exports = {
     db,
-    config,
-    formatPrice: (value) => {
-        return value.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-    },
-    formatValue: (type, value) => {
-        if (type === "FIXED") return this.formatPrice(value);
-        return `${value}%`;
-    }
+    formatPrice
 };

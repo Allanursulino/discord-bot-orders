@@ -41,7 +41,9 @@ class CheckoutService {
             updatedAt: new Date().toISOString(),
             coupon: null,
             payment: null,
-            currency: product.currency || 'BRL'
+            currency: product.currency || 'BRL',
+            payment_attempts: 0,
+            max_payment_attempts: 3
         };
 
         db.set(`checkout:${checkoutId}`, checkout);
@@ -162,7 +164,7 @@ class CheckoutService {
         return checkout;
     }
 
-    // Iniciar pagamento
+    // Iniciar pagamento (ATUALIZADO para Mercado Pago)
     async startPayment(checkoutId, paymentMethod) {
         const checkout = this.getCheckout(checkoutId);
         if (!checkout) return null;
@@ -173,14 +175,15 @@ class CheckoutService {
         let paymentResult;
 
         if (paymentMethod === 'pix') {
-            // PIX com SumUp
-            paymentResult = await paymentService.generatePixQRCode(
+            // PIX com Mercado Pago (SUBSTITUIU SumUp)
+            paymentResult = await paymentService.createMercadoPagoPixPayment(
                 checkout.total,
-                `Compra: ${product.title}`,
-                checkoutId
+                `Compra Discord: ${product.title}`,
+                checkoutId,
+                checkout.userId
             );
         } else {
-            // Stripe (cartão/boleto)
+            // Stripe (cartão/boleto) - mantido
             paymentResult = await paymentService.createStripePaymentLink(
                 checkout.total,
                 product.title,
@@ -194,12 +197,17 @@ class CheckoutService {
             );
         }
 
+        // Atualizar tentativas de pagamento
+        checkout.payment_attempts = (checkout.payment_attempts || 0) + 1;
+
         checkout.payment = {
             method: paymentMethod,
-            provider: paymentMethod === 'pix' ? 'sumup' : 'stripe',
+            provider: paymentMethod === 'pix' ? 'mercado_pago' : 'stripe',
             data: paymentResult,
             status: 'pending',
-            createdAt: new Date().toISOString()
+            payment_id: paymentResult.payment_id || paymentResult.payment_link_id || paymentResult.payment_intent_id,
+            createdAt: new Date().toISOString(),
+            expires_at: paymentResult.expires_at
         };
 
         checkout.status = 'PENDING';
@@ -212,23 +220,28 @@ class CheckoutService {
         };
     }
 
-    // Verificar status do pagamento
+    // Verificar status do pagamento (ATUALIZADO para Mercado Pago)
     async checkPaymentStatus(checkoutId) {
         const checkout = this.getCheckout(checkoutId);
         if (!checkout || !checkout.payment) return null;
 
         let status;
         
-        if (checkout.payment.provider === 'sumup') {
-            status = await paymentService.checkPixPayment(checkout.payment.data.checkout_id);
+        if (checkout.payment.provider === 'mercado_pago') {
+            // Mercado Pago
+            status = await paymentService.checkMercadoPagoPayment(checkout.payment.payment_id);
         } else {
-            status = await paymentService.checkStripePayment(checkout.payment.data.payment_intent_id);
+            // Stripe
+            status = await paymentService.checkStripePayment(checkout.payment.payment_id);
         }
 
-        if (status.status === 'PAID' || status.status === 'succeeded') {
+        const isPaid = status.status === 'paid' || status.status === 'succeeded' || status.original_status === 'approved';
+        
+        if (isPaid) {
             checkout.status = 'APPROVED';
             checkout.payment.status = 'paid';
             checkout.payment.paidAt = new Date().toISOString();
+            checkout.payment.verified_at = new Date().toISOString();
             
             // Reduzir estoque
             productService.reduceStock(
@@ -236,6 +249,11 @@ class CheckoutService {
                 checkout.quantity, 
                 checkout.variantId
             );
+        } else if (status.status === 'failed' || status.original_status === 'rejected') {
+            checkout.payment.status = 'failed';
+            checkout.payment.failed_at = new Date().toISOString();
+        } else if (status.status === 'expired') {
+            checkout.payment.status = 'expired';
         }
 
         checkout.updatedAt = new Date().toISOString();
@@ -277,6 +295,16 @@ class CheckoutService {
         return all.filter(checkout => checkout.status === status);
     }
 
+    // Obter checkouts com pagamento pendente
+    getPendingPayments() {
+        const all = this.getAllCheckouts();
+        return all.filter(checkout => 
+            checkout.status === 'PENDING' && 
+            checkout.payment && 
+            checkout.payment.status === 'pending'
+        );
+    }
+
     // Limpar checkouts antigos
     cleanupOldCheckouts(maxAgeHours = 24) {
         const all = this.getAllCheckouts();
@@ -288,13 +316,36 @@ class CheckoutService {
             const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
             
             if (hoursDiff > maxAgeHours && 
-                (checkout.status === 'CANCELLED' || checkout.status === 'COMPLETED')) {
+                (checkout.status === 'CANCELLED' || checkout.status === 'COMPLETED' || 
+                 checkout.status === 'EXPIRED' || checkout.payment?.status === 'failed')) {
                 db.delete(`checkout:${checkout.id}`);
                 cleaned++;
             }
         });
 
         return cleaned;
+    }
+
+    // Verificar checkouts expirados
+    checkExpiredCheckouts() {
+        const all = this.getAllCheckouts();
+        const now = new Date();
+        let expired = 0;
+
+        all.forEach(checkout => {
+            if (checkout.status === 'PENDING' && checkout.payment?.expires_at) {
+                const expiresAt = new Date(checkout.payment.expires_at);
+                if (now > expiresAt) {
+                    checkout.status = 'EXPIRED';
+                    checkout.payment.status = 'expired';
+                    checkout.updatedAt = now.toISOString();
+                    db.set(`checkout:${checkout.id}`, checkout);
+                    expired++;
+                }
+            }
+        });
+
+        return expired;
     }
 }
 
